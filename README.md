@@ -11,7 +11,8 @@ go get github.com/TakuyaYagam1/go-pgkit
 ```go
 import "github.com/TakuyaYagam1/go-pgkit/pgutil"
 import "github.com/TakuyaYagam1/go-pgkit/postgres"
-import "github.com/TakuyaYagam1/go-pgkit/migrator"
+import "github.com/TakuyaYagam1/go-pgkit/migrator/goose"
+import "github.com/TakuyaYagam1/go-pgkit/migrator/migrate"
 ```
 
 ## Subpackages
@@ -32,10 +33,10 @@ import "github.com/TakuyaYagam1/go-pgkit/migrator"
 
 ### migrator
 
-Two runners; use the one that matches your migration layout.
+Two runners in subpackages; use the one that matches your migration layout.
 
-- **RunFromConn(connStr, migrationsPath)** — goose: SQL files with `-- +goose Up` / `-- +goose Down`
-- **RunMigrate(connURL, migrationsPath)** — golang-migrate: `NNNNNN_name.up.sql` / `NNNNNN_name.down.sql`; treats ErrNoChange as success
+- **goose.Run(ctx, connStr, migrationsPath)** — pressly/goose: SQL files with `-- +goose Up` / `-- +goose Down`
+- **migrate.Run(ctx, connURL, migrationsPath)** — golang-migrate: `NNNNNN_name.up.sql` / `NNNNNN_name.down.sql`; treats ErrNoChange as success
 
 ## Example
 
@@ -49,7 +50,7 @@ if err != nil {
 }
 defer pool.Close()
 
-if err := migrator.RunFromConn(connStr, "./migrations"); err != nil {
+if err := goose.Run(ctx, connStr, "./migrations"); err != nil {
     log.Fatal(err)
 }
 
