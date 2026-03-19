@@ -2,6 +2,7 @@ package pgutil
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -23,9 +24,36 @@ func TestIsNoRows(t *testing.T) {
 func TestIsPgUniqueViolation(t *testing.T) {
 	t.Parallel()
 	assert.True(t, IsPgUniqueViolation(&pgconn.PgError{Code: "23505"}))
+	assert.True(t, IsPgUniqueViolation(fmt.Errorf("wrap: %w", &pgconn.PgError{Code: "23505"})))
 	assert.False(t, IsPgUniqueViolation(&pgconn.PgError{Code: "23503"}))
 	assert.False(t, IsPgUniqueViolation(nil))
 	assert.False(t, IsPgUniqueViolation(errors.New("other")))
+}
+
+func TestIsForeignKeyViolation(t *testing.T) {
+	t.Parallel()
+	assert.True(t, IsForeignKeyViolation(&pgconn.PgError{Code: "23503"}))
+	assert.True(t, IsForeignKeyViolation(fmt.Errorf("wrap: %w", &pgconn.PgError{Code: "23503"})))
+	assert.False(t, IsForeignKeyViolation(&pgconn.PgError{Code: "23505"}))
+	assert.False(t, IsForeignKeyViolation(nil))
+	assert.False(t, IsForeignKeyViolation(errors.New("other")))
+}
+
+func TestIsNotNullViolation(t *testing.T) {
+	t.Parallel()
+	assert.True(t, IsNotNullViolation(&pgconn.PgError{Code: "23502"}))
+	assert.True(t, IsNotNullViolation(fmt.Errorf("wrap: %w", &pgconn.PgError{Code: "23502"})))
+	assert.False(t, IsNotNullViolation(&pgconn.PgError{Code: "23505"}))
+	assert.False(t, IsNotNullViolation(nil))
+	assert.False(t, IsNotNullViolation(errors.New("other")))
+}
+
+func TestPgErrorCode(t *testing.T) {
+	t.Parallel()
+	assert.Equal(t, "23505", PgErrorCode(&pgconn.PgError{Code: "23505"}))
+	assert.Equal(t, "23503", PgErrorCode(fmt.Errorf("wrap: %w", &pgconn.PgError{Code: "23503"})))
+	assert.Equal(t, "", PgErrorCode(nil))
+	assert.Equal(t, "", PgErrorCode(errors.New("other")))
 }
 
 func TestTimestamptzToTime(t *testing.T) {

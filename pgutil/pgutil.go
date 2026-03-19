@@ -20,6 +20,27 @@ func IsPgUniqueViolation(err error) bool {
 	return err != nil && errors.As(err, &pgErr) && pgErr.Code == "23505"
 }
 
+// IsForeignKeyViolation reports whether err is a PostgreSQL foreign key violation (SQLSTATE 23503).
+func IsForeignKeyViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	return err != nil && errors.As(err, &pgErr) && pgErr.Code == "23503"
+}
+
+// IsNotNullViolation reports whether err is a PostgreSQL not null violation (SQLSTATE 23502).
+func IsNotNullViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	return err != nil && errors.As(err, &pgErr) && pgErr.Code == "23502"
+}
+
+// PgErrorCode extracts the SQLSTATE code from err, or "" if err is not a PgError.
+func PgErrorCode(err error) string {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.Code
+	}
+	return ""
+}
+
 // TimestamptzToTime returns a pointer to the time, or nil if t.Valid is false.
 func TimestamptzToTime(t pgtype.Timestamptz) *time.Time {
 	if !t.Valid {

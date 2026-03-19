@@ -10,11 +10,11 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-// StartPostgres starts a PostgreSQL container (postgres:17-alpine) and returns a connection string with sslmode=disable. The container is terminated via t.Cleanup. Use in integration tests that need a real database. Do not log the returned connection string without masking it (e.g. postgres.MaskURL).
+// StartPostgres starts a PostgreSQL container (postgres:18-alpine) and returns a connection string with sslmode=disable. The container is terminated via t.Cleanup. Use in integration tests that need a real database. Do not log the returned connection string without masking it (e.g. postgres.MaskURL).
 func StartPostgres(t *testing.T) string {
 	t.Helper()
 	ctx := context.Background()
-	c, err := postgres.Run(ctx, "postgres:17-alpine",
+	c, err := postgres.Run(ctx, "postgres:18-alpine",
 		postgres.WithDatabase("pgkit_test"),
 		postgres.WithUsername("u"),
 		postgres.WithPassword("p"),

@@ -51,33 +51,43 @@ func New(ctx context.Context, cfg *Config) (*pgxpool.Pool, error) {
 	}
 	poolCfg.MaxConns = int32(maxConns)
 	poolCfg.MinConns = int32(minConns)
-	poolCfg.MaxConnLifetime = defaultMaxConnLifetime
-	poolCfg.MaxConnIdleTime = defaultMaxConnIdleTime
-	poolCfg.HealthCheckPeriod = defaultHealthCheck
-	poolCfg.ConnConfig.ConnectTimeout = defaultConnectTimeout
-
-	var pool *pgxpool.Pool
-	operation := func() error {
-		var createErr error
-		pool, createErr = pgxpool.NewWithConfig(ctx, poolCfg)
-		if createErr != nil {
-			return createErr
-		}
-		if pingErr := pool.Ping(ctx); pingErr != nil {
-			pool.Close()
-			pool = nil
-			return pingErr
-		}
-		return nil
+	if cfg.MaxConnLifetime > 0 {
+		poolCfg.MaxConnLifetime = cfg.MaxConnLifetime
+	} else {
+		poolCfg.MaxConnLifetime = defaultMaxConnLifetime
+	}
+	if cfg.MaxConnIdleTime > 0 {
+		poolCfg.MaxConnIdleTime = cfg.MaxConnIdleTime
+	} else {
+		poolCfg.MaxConnIdleTime = defaultMaxConnIdleTime
+	}
+	if cfg.HealthCheckPeriod > 0 {
+		poolCfg.HealthCheckPeriod = cfg.HealthCheckPeriod
+	} else {
+		poolCfg.HealthCheckPeriod = defaultHealthCheck
+	}
+	if cfg.ConnectTimeout > 0 {
+		poolCfg.ConnConfig.ConnectTimeout = cfg.ConnectTimeout
+	} else {
+		poolCfg.ConnConfig.ConnectTimeout = defaultConnectTimeout
 	}
 
+	pool, err := pgxpool.NewWithConfig(ctx, poolCfg)
+	if err != nil {
+		return nil, fmt.Errorf("postgres - New: pool creation failed: %w", err)
+	}
+
+	operation := func() error {
+		return pool.Ping(ctx)
+	}
 	bo := backoff.NewExponentialBackOff()
 	bo.MaxElapsedTime = pgConnRetryTimeout
 	if cfg.RetryTimeout > 0 {
 		bo.MaxElapsedTime = cfg.RetryTimeout
 	}
 	if err := backoff.Retry(operation, backoff.WithContext(bo, ctx)); err != nil {
-		return nil, fmt.Errorf("postgres - New: connection failed after retries: %w", err)
+		pool.Close()
+		return nil, fmt.Errorf("postgres - New: ping failed after retries: %w", err)
 	}
 
 	return pool, nil

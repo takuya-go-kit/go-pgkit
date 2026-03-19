@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
@@ -27,13 +26,12 @@ func Run(ctx context.Context, connStr, migrationsPath string) error {
 	if err != nil {
 		return fmt.Errorf("goose.Run: migrations path: %w", err)
 	}
-	cwd, err := os.Getwd()
+	info, err := os.Stat(absPath)
 	if err != nil {
-		return fmt.Errorf("goose.Run: getwd: %w", err)
+		return fmt.Errorf("goose.Run: migrations path: %w", err)
 	}
-	rel, err := filepath.Rel(cwd, absPath)
-	if err != nil || strings.HasPrefix(rel, "..") {
-		return fmt.Errorf("goose.Run: migrations path must be under working directory")
+	if !info.IsDir() {
+		return fmt.Errorf("goose.Run: migrations path is not a directory")
 	}
 	db, err := sql.Open("pgx", connStr)
 	if err != nil {

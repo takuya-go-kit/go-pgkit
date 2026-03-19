@@ -1,5 +1,9 @@
 # go-pgkit
 
+[![CI](https://github.com/TakuyaYagam1/go-pgkit/actions/workflows/ci.yml/badge.svg)](https://github.com/TakuyaYagam1/go-pgkit/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/TakuyaYagam1/go-pgkit.svg)](https://pkg.go.dev/github.com/TakuyaYagam1/go-pgkit)
+[![Go Report Card](https://goreportcard.com/badge/github.com/TakuyaYagam1/go-pgkit)](https://goreportcard.com/report/github.com/TakuyaYagam1/go-pgkit)
+
 PostgreSQL helpers for pgx: error checks, timestamptz converters, pool with retry, and migration runners (goose and golang-migrate).
 
 ## Install
@@ -21,6 +25,9 @@ import "github.com/TakuyaYagam1/go-pgkit/migrator/migrate"
 
 - **IsNoRows(err)** — true if err is or wraps pgx.ErrNoRows
 - **IsPgUniqueViolation(err)** — true if PostgreSQL unique violation (23505)
+- **IsForeignKeyViolation(err)** — true if PostgreSQL foreign key violation (23503)
+- **IsNotNullViolation(err)** — true if PostgreSQL not null violation (23502)
+- **PgErrorCode(err)** — SQLSTATE code or ""
 - **TimestamptzToTime(t)** — *time.Time or nil if invalid
 - **TimestamptzToTimeZero(t)** — time.Time or zero if invalid
 - **TimeToTimestamptz(t)** — pgtype.Timestamptz (invalid if t is nil)
@@ -28,20 +35,20 @@ import "github.com/TakuyaYagam1/go-pgkit/migrator/migrate"
 
 ### postgres
 
-- **Config** — URL, MaxConns, MinConns
-- **New(cfg)** — create pgxpool with exponential backoff retry until Ping succeeds
+- **Config** — URL, MaxConns, MinConns, RetryTimeout; optional MaxConnLifetime, MaxConnIdleTime, HealthCheckPeriod, ConnectTimeout (0 = defaults)
+- **New(ctx, cfg)** — create pgxpool with exponential backoff retry until Ping succeeds
 
 ### migrator
 
 Two runners in subpackages; use the one that matches your migration layout.
 
 - **goose.Run(ctx, connStr, migrationsPath)** — pressly/goose: SQL files with `-- +goose Up` / `-- +goose Down`
-- **migrate.Run(ctx, connURL, migrationsPath)** — golang-migrate: `NNNNNN_name.up.sql` / `NNNNNN_name.down.sql`; treats ErrNoChange as success
+- **migrate.Run(ctx, connURL, migrationsPath)** — golang-migrate: `NNNNNN_name.up.sql` / `NNNNNN_name.down.sql`; treats ErrNoChange as success. **Note:** The underlying library's `Up()` does not accept context; a migration in progress cannot be cancelled. For long-running migrations, consider setting `statement_timeout` at the session or DB level.
 
 ## Example
 
 ```go
-pool, err := postgres.New(&postgres.Config{
+pool, err := postgres.New(ctx, &postgres.Config{
     URL:     os.Getenv("DATABASE_URL"),
     MaxConns: 20,
 })

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -29,13 +28,15 @@ func Run(ctx context.Context, connURL, migrationsPath string) (err error) {
 	if err != nil {
 		return fmt.Errorf("migrate.Run: migrations path: %w", err)
 	}
-	cwd, err := os.Getwd()
+	info, err := os.Stat(absPath)
 	if err != nil {
-		return fmt.Errorf("migrate.Run: getwd: %w", err)
+		return fmt.Errorf("migrate.Run: migrations path: %w", err)
 	}
-	rel, err := filepath.Rel(cwd, absPath)
-	if err != nil || strings.HasPrefix(rel, "..") {
-		return fmt.Errorf("migrate.Run: migrations path must be under working directory")
+	if !info.IsDir() {
+		return fmt.Errorf("migrate.Run: migrations path is not a directory")
+	}
+	if ctx.Err() != nil {
+		return fmt.Errorf("migrate.Run: %w", ctx.Err())
 	}
 	m, err := migrate.New("file://"+absPath, connURL)
 	if err != nil {

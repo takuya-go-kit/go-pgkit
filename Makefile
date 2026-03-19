@@ -1,10 +1,13 @@
-.PHONY: test test-race fmt vet
+.PHONY: test test-unit test-integration fmt vet
 
 test:
-	go test ./...
+	go test -race -tags=integration ./...
 
-test-race:
+test-unit:
 	go test -race ./...
+
+test-integration:
+	go test -race -run 'Test' -tags=integration -count=1 ./...
 
 fmt:
 	gofmt -w .
