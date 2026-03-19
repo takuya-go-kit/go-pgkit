@@ -17,10 +17,10 @@ func TestRun_EmptyParams(t *testing.T) {
 	require.NoError(t, err)
 
 	tests := []struct {
-		name   string
+		name    string
 		connURL string
-		path  string
-		want  string
+		path    string
+		want    string
 	}{
 		{"empty connURL", "", absDir, "connection URL is empty"},
 		{"empty path", "postgres://localhost/db", "", "migrations path is empty"},
