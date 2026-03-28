@@ -39,7 +39,7 @@ func TestMaskURL(t *testing.T) {
 				assert.NotContains(t, got, s, "masked output must not contain password")
 			}
 			if tt.noShow != nil {
-				assert.True(t, len(got) > 0 && (contains(got, "***") || contains(got, "%2A%2A%2A")), "masked output should contain placeholder")
+				assert.True(t, got != "" && (contains(got, "***") || contains(got, "%2A%2A%2A")), "masked output should contain placeholder")
 			}
 		})
 	}

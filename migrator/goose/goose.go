@@ -11,7 +11,6 @@ import (
 
 	_ "github.com/jackc/pgx/v5/stdlib" // pgx postgres driver registration
 	"github.com/pressly/goose/v3"
-
 	"github.com/wahrwelt-kit/go-pgkit/postgres"
 )
 

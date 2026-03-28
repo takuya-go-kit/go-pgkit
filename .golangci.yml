@@ -1,51 +1,164 @@
 version: "2"
+
 linters:
   default: all
   disable:
-    - wsl
-    - wsl_v5
-    - varnamelen
-    - paralleltest
-    - ireturn
     - depguard
-    - lll
-    - exhaustruct
+    - dupl
     - err113
+    - exhaustruct
+    - funlen
+    - gochecknoglobals
+    - godoclint
+    - ireturn
+    - lll
+    - mnd
+    - nonamedreturns
+    - nolintlint
+    - perfsprint
     - testpackage
-    - nlreturn
-    - noinlineerr
-    - inamedparam
+    - varnamelen
+    - wrapcheck
+    - wsl
     - funcorder
     - godot
-    - mnd
-    - wrapcheck
+    - inamedparam
+    - nlreturn
+    - noinlineerr
+    - paralleltest
+    - tagliatelle
+    - wsl_v5
 
   settings:
     cyclop:
-      max-complexity: 25
-    gocognit:
-      min-complexity: 40
-    funlen:
-      lines: 100
-      statements: 60
+      max-complexity: 15
+    errcheck:
+      check-type-assertions: true
+      check-blank: false
+    gocritic:
+      enable-all: true
+      disabled-checks:
+        - hugeParam
+        - rangeValCopy
+        - importShadow
+    gosec:
+      excludes:
+        - G705
+        - G117
+        - G703
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment
+        - shadow
+    nestif:
+      min-complexity: 7
+    nilnil:
+      detect-opposite: true
+    prealloc:
+      for-loops: true
+    reassign:
+      patterns:
+        - ".*"
+    revive:
+      enable-all-rules: true
+      rules:
+        - name: unexported-return
+          disabled: true
+        - name: line-length-limit
+          disabled: true
+        - name: add-constant
+          disabled: true
+        - name: var-naming
+          disabled: true
+        - name: nested-structs
+          disabled: true
+        - name: max-public-structs
+          disabled: true
+        - name: function-length
+          disabled: true
+        - name: import-shadowing
+          disabled: true
+        - name: empty-block
+          disabled: true
+        - name: confusing-naming
+          disabled: true
+        - name: exported
+          disabled: true
+        - name: unused-receiver
+          disabled: true
+        - name: indent-error-flow
+          disabled: true
+        - name: early-return
+          disabled: true
+        - name: argument-limit
+          disabled: true
+        - name: cognitive-complexity
+          disabled: true
+        - name: get-return
+          disabled: true
+        - name: struct-tag
+          disabled: true
+        - name: context-as-argument
+          disabled: true
+        - name: unhandled-error
+          arguments:
+            - "^fmt.Print.*"
+            - "strings.Builder.Write.*"
+            - "bytes.Buffer.Write.*"
+        - name: cyclomatic
+          arguments:
+            - 15
+        - name: import-alias-naming
+          arguments:
+            - "^([a-z][a-z0-9]*(_[a-z0-9]+)*)|([A-Z][A-Z0-9]*)$"
+        - name: package-naming
+          arguments:
+            - convention-name-check-regex: "^([a-z][a-z0-9]*(_[a-z0-9]+)*)|([A-Z][A-Z0-9]*)$"
+    staticcheck:
+      checks:
+        - all
+        - "-S1008"
+        - "-SA9003"
+        - "-ST1003"
+    testifylint:
+      enable-all: true
+    usestdlibvars:
+      time-month: true
+      time-layout: true
+      crypto-hash: true
+      tls-signature-scheme: true
+      constant-kind: true
 
   exclusions:
+    presets:
+      - comments
+      - common-false-positives
     rules:
       - path: _test\.go
         linters:
           - errcheck
-          - funlen
-          - cyclop
           - errchkjson
           - gosec
           - nilnil
           - containedctx
           - tparallel
-      - linters:
-          - revive
-        text: "context-as-argument"
 
 formatters:
   enable:
     - gofmt
+    - gofumpt
+    - gci
     - goimports
+  settings:
+    gofumpt:
+      extra-rules: true
+    goimports:
+      local-prefixes:
+        - github.com/wahrwelt-kit
+
+issues:
+  max-same-issues: 0
+
+run:
+  relative-path-mode: gomod

@@ -22,7 +22,7 @@ type Config struct {
 }
 
 var (
-	kvPasswordRE    = regexp.MustCompile(`(?i)\bpassword\s*=\s*(?:'[^']*'|"[^"]*"|[^\s]+)`)
+	kvPasswordRE    = regexp.MustCompile(`(?i)\bpassword\s*=\s*(?:'[^']*'|"[^"]*"|\S+)`)
 	userInfoBlockRE = regexp.MustCompile(`(://)([^@]*)(@)([^/]*)(/|$)`)
 )
 

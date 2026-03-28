@@ -9,7 +9,6 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/require"
-
 	"github.com/wahrwelt-kit/go-pgkit/migrator/testutil"
 )
 
