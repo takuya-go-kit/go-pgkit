@@ -9,6 +9,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const testPgURL = "postgres://localhost/db"
+
 func TestNew_Validation(t *testing.T) {
 	t.Parallel()
 	validURL := "postgres://user:pass@localhost:5432/dbname?sslmode=disable"
@@ -87,15 +89,15 @@ func TestDurationOrDefault(t *testing.T) {
 
 func TestValidateLimits_Defaults(t *testing.T) {
 	t.Parallel()
-	require.NoError(t, validateLimits(&Config{URL: "postgres://localhost/db"}))
+	require.NoError(t, validateLimits(&Config{URL: testPgURL}))
 }
 
 func TestValidateLimits_ValidBounds(t *testing.T) {
 	t.Parallel()
-	require.NoError(t, validateLimits(&Config{URL: "postgres://localhost/db", MaxConns: 100, MinConns: 10}))
+	require.NoError(t, validateLimits(&Config{URL: testPgURL, MaxConns: 100, MinConns: 10}))
 }
 
 func TestValidateLimits_MinEqualsMax(t *testing.T) {
 	t.Parallel()
-	require.NoError(t, validateLimits(&Config{URL: "postgres://localhost/db", MaxConns: 5, MinConns: 5}))
+	require.NoError(t, validateLimits(&Config{URL: testPgURL, MaxConns: 5, MinConns: 5}))
 }
